@@ -12,6 +12,9 @@ Vue.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/uploadForm">Form <span class="sr-only">(current)</span></router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -51,12 +54,57 @@ const NotFound = Vue.component('not-found', {
     }
 })
 
+const Form = Vue.component('/uploadForm', {
+    template:
+     `
+     
+    <div>
+        <form @submit.prevent="uploadPhoto()" id="uploadForm">
+           <label>Photo</label>
+           <input type='file' name='photo'> <br>
+           <label>Description</label>
+           <textarea name='desc' placeholder='Enter description'></textarea><br>
+           <button type='submit'>Submit</button>
+        </form>
+    </div>
+    `
+    ,
+
+    methods: {
+       uploadPhoto: function(){
+
+        let uploadForm = document.getElementById('uploadForm');
+        let form_data = new FormData(uploadForm);
+        fetch("/api/upload", {
+            method: 'POST',
+            body: form_data,
+            headers: {
+                'X-CSRFToken': token
+                },
+                credentials: 'same-origin'
+           })
+            .then(function (response) {
+            return response.json();
+            })
+            .then(function (jsonResponse) {
+            // display a success message
+            console.log(jsonResponse); 
+            })
+            .catch(function (error) {
+            console.log(error);
+            });
+       } 
+       
+    }
+})
+
 // Define Routes
 const router = new VueRouter({
     mode: 'history',
     routes: [
         {path: "/", component: Home},
         // Put other routes here
+        {path: "/uploadForm", component: Form},
 
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}
